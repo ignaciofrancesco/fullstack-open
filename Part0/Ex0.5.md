@@ -17,7 +17,7 @@
         activate server
         server-->>browser: application/javascript "spa.js"
         deactivate server
-        Note left of browser: Starts executing the code in spa.js. This will get the json file with the notes, and render them.
+        Note left of browser: Starts executing the code in spa.js. This will get the json file with the notes.
 
         browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
         activate server
