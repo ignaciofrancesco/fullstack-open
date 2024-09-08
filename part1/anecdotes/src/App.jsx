@@ -1,5 +1,22 @@
 import { useState } from "react";
 
+/* COMPONENTS */
+
+const SectionTitle = (props) => {
+  return <h2>{props.children}</h2>;
+};
+
+const AnecdoteDisplay = ({ anecdote, votes }) => {
+  return (
+    <>
+      <div>"{anecdote}"</div>
+      <p>has {votes} votes.</p>
+    </>
+  );
+};
+
+/* MAIN COMPONENT */
+
 const App = () => {
   /* Data */
   const anecdotes = [
@@ -11,14 +28,24 @@ const App = () => {
     "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.",
     "Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.",
     "The only way to go fast, is to go well.",
+    "Ori es una modelo.",
   ];
 
   /* State */
   const [selected, setSelected] = useState(0);
+  const [votes, setVotes] = useState(Array(anecdotes.length).fill(0));
 
   /* Computed values */
+  const maxVotes = Math.max(...votes);
+  const winnerAnecdote = votes.indexOf(maxVotes);
 
   /* Event handlers */
+  const handleClickVote = () => {
+    const newVotes = [...votes];
+    newVotes[selected] += 1;
+    setVotes(newVotes);
+  };
+
   const handleClickNextAnecdote = () => {
     const newSelected = Math.floor(Math.random() * anecdotes.length);
     setSelected(newSelected);
@@ -26,8 +53,15 @@ const App = () => {
 
   return (
     <div>
-      <div>{anecdotes[selected]}</div>
+      <SectionTitle>Anecdote of the day</SectionTitle>
+      <AnecdoteDisplay anecdote={anecdotes[selected]} votes={votes[selected]} />
+      <button onClick={handleClickVote}>vote</button>
       <button onClick={handleClickNextAnecdote}>next anecdote</button>
+      <SectionTitle>Anecdote with most votes</SectionTitle>
+      <AnecdoteDisplay
+        anecdote={anecdotes[winnerAnecdote]}
+        votes={votes[winnerAnecdote]}
+      />
     </div>
   );
 };
