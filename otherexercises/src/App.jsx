@@ -1,6 +1,70 @@
 import { useState } from "react";
+import Note from "./components/Note";
 
-const Display = ({ counter }) => {
+const App = (props) => {
+  const [notes, setNotes] = useState(props.notes);
+  const [newNote, setNewNote] = useState("");
+  const [showAll, setShowAll] = useState(true);
+
+  const notesToShow = showAll
+    ? notes
+    : notes.filter((note) => {
+        return note.important;
+      });
+
+  const addNote = (event) => {
+    event.preventDefault();
+
+    const newNoteObject = {
+      id: notes.length + 1,
+      content: newNote,
+      important: Math.random() > 0.5,
+    };
+
+    const newNotesArray = notes.concat(newNoteObject);
+
+    setNotes(newNotesArray);
+    setNewNote("");
+  };
+
+  const handleChangeNewNote = (event) => {
+    setNewNote(event.target.value);
+  };
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <button
+        onClick={(event) => {
+          setShowAll(!showAll);
+        }}
+      >
+        show {showAll ? "important" : "all"}
+      </button>
+      <ul>
+        {notesToShow.map((note) => {
+          return <Note key={note.id} note={note} />; // When creating a li component inside a ul componente, i can just pass the key in the ul list.
+        })}
+      </ul>
+      <form onSubmit={addNote}>
+        <input
+          type="text"
+          value={newNote}
+          placeholder="Type your note..."
+          onChange={handleChangeNewNote}
+        />
+        <button type="submit">save</button>
+      </form>
+    </div>
+  );
+};
+
+export default App;
+
+/*
+import { useState } from "react";
+
+ const Display = ({ counter }) => {
   return <div>{counter}</div>;
 };
 
@@ -44,3 +108,4 @@ const App = () => {
 };
 
 export default App;
+ */
