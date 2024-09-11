@@ -1,6 +1,10 @@
 import { useState } from "react";
+import Filter from "./components/Filter";
+import PersonForm from "./components/PersonForm";
+import Persons from "./components/Persons";
 
 const App = () => {
+  /* State */
   const [persons, setPersons] = useState([
     { name: "Arto Hellas", number: "040-123456", id: 1 },
     { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
@@ -10,21 +14,25 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
-  const [filteredPersons, setFilteredPersons] = useState(persons);
+  // const [filteredPersons, setFilteredPersons] = useState(persons);
 
-  const handleChangeFilter = (event) => {
-    const newFilter = event.target.value;
-    setFilter(newFilter);
-
-    // Filter the persons array: include only those that include the filter string
-    const newFilteredPersons = persons.filter((person) => {
+  /* Computed Values */
+  let filteredPersons = null;
+  if (filter != "") {
+    filteredPersons = persons.filter((person) => {
       return person.name
         .trim()
         .toUpperCase()
-        .includes(newFilter.trim().toUpperCase());
+        .includes(filter.trim().toUpperCase());
     });
+  } else {
+    filteredPersons = [...persons];
+  }
 
-    setFilteredPersons(newFilteredPersons);
+  /* Event Handlers */
+  const handleChangeFilter = (event) => {
+    const newFilter = event.target.value;
+    setFilter(newFilter);
   };
 
   const handleSubmit = (event) => {
@@ -39,13 +47,16 @@ const App = () => {
       return;
     }
 
-    const newPerson = { name: newName, number: newNumber };
+    const newPerson = {
+      name: newName,
+      number: newNumber,
+      id: persons.length + 1,
+    };
     const newPersons = [...persons, newPerson];
 
     setPersons(newPersons);
     setNewName("");
     setNewNumber("");
-    setFilteredPersons(newPersons);
     setFilter("");
   };
 
@@ -57,54 +68,23 @@ const App = () => {
     setNewNumber(event.target.value);
   };
 
+  /* Return */
   return (
     <div>
-      <div>filter: {filter}</div>
       <h1>Phonebook</h1>
-      <div>
-        <label htmlFor="filter">Filter shown with: </label>
-        <input
-          id="filter"
-          type="text"
-          placeholder="Type filter..."
-          value={filter}
-          onChange={handleChangeFilter}
-        />
-      </div>
+      <Filter value={filter} onChange={handleChangeFilter} />
+
       <h2>Add a new contact</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          name:
-          <input
-            type="text"
-            value={newName}
-            placeholder="Name your contact..."
-            onChange={handleChangeName}
-          />
-        </div>
-        <div>
-          number:
-          <input
-            type="text"
-            value={newNumber}
-            placeholder="Type the number..."
-            onChange={handleChangeNumber}
-          />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonForm
+        onSubmit={handleSubmit}
+        nameValue={newName}
+        onChangeName={handleChangeName}
+        numberValue={newNumber}
+        onChangeNumber={handleChangeNumber}
+      />
+
       <h2>Numbers</h2>
-      <ul>
-        {filteredPersons.map((person, index) => {
-          return (
-            <li key={index}>
-              {person.name} {person.number}
-            </li>
-          );
-        })}
-      </ul>
+      <Persons filteredPersons={filteredPersons} />
     </div>
   );
 };
