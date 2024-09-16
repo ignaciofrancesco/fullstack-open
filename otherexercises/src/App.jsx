@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import notesService from "./Service/notes.js";
 import Note from "./components/Note";
 
 const App = (props) => {
-  const [notes, setNotes] = useState(props.notes);
+  const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
   const [showAll, setShowAll] = useState(true);
+
+  useEffect(() => {
+    notesService.getAll().then((allNotes) => {
+      setNotes(allNotes);
+    });
+  }, []);
 
   const notesToShow = showAll
     ? notes
@@ -16,19 +23,45 @@ const App = (props) => {
     event.preventDefault();
 
     const newNoteObject = {
-      id: notes.length + 1,
       content: newNote,
       important: Math.random() > 0.5,
     };
 
-    const newNotesArray = notes.concat(newNoteObject);
-
-    setNotes(newNotesArray);
-    setNewNote("");
+    notesService.create(newNoteObject).then((createdNote) => {
+      const newNotesArray = notes.concat(createdNote);
+      setNotes(newNotesArray);
+      setNewNote("");
+    });
   };
 
   const handleChangeNewNote = (event) => {
     setNewNote(event.target.value);
+  };
+
+  const toggleImportanceOf = (id) => {
+    const note = notes.find((note) => {
+      return note.id === id;
+    });
+
+    const changedNote = { ...note, important: !note.important };
+
+    // Update the note in the server
+    notesService
+      .update(id, changedNote)
+      .then((updatedNote) => {
+        // Update the state of the notes
+        const newNotesArray = notes.map((note) => {
+          return note.id === id ? updatedNote : note;
+        });
+        setNotes(newNotesArray);
+      })
+      .catch((error) => {
+        alert(`The note ${id} doesn't exist anymore in the DB.`);
+        const newNotesArray = notes.filter((note) => {
+          return note.id !== id;
+        });
+        setNotes(newNotesArray);
+      });
   };
 
   return (
@@ -43,7 +76,15 @@ const App = (props) => {
       </button>
       <ul>
         {notesToShow.map((note) => {
-          return <Note key={note.id} note={note} />; // When creating a li component inside a ul componente, i can just pass the key in the ul list.
+          return (
+            <Note
+              key={note.id}
+              note={note}
+              toggleImportance={() => {
+                toggleImportanceOf(note.id);
+              }}
+            />
+          ); // When creating a li component inside a ul componente, i can just pass the key in the ul list.
         })}
       </ul>
       <form onSubmit={addNote}>

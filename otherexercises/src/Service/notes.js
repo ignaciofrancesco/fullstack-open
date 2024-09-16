@@ -1,0 +1,28 @@
+import axios from "axios";
+
+const baseUrl = "http://localhost:3001/notes";
+
+const getAll = () => {
+  const nonExistentNote = {
+    id: 100,
+    content: "just a test",
+    important: true,
+  };
+
+  const request = axios.get(baseUrl);
+  return request.then((response) => response.data.concat(nonExistentNote));
+};
+
+const create = (newObject) => {
+  const request = axios.post(baseUrl, newObject);
+
+  return request.then((response) => response.data);
+};
+
+const update = (id, changedObject) => {
+  const request = axios.put(`${baseUrl}/${id}`, changedObject);
+
+  return request.then((response) => response.data);
+};
+
+export default { getAll, create, update };
