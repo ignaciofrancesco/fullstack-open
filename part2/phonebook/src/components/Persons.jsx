@@ -1,11 +1,26 @@
+import personsService from "../Service/persons";
+
 const Persons = (props) => {
-  const { filteredPersons } = props;
+  const { filteredPersons, onDeletePerson } = props;
 
   return (
     <div>
       <ul>
         {filteredPersons.map((person) => {
-          return <PersonDetails key={person.id} person={person} />;
+          return (
+            <li key={person.id}>
+              <PersonDetails person={person} />
+              <button
+                onClick={() => {
+                  if (confirm(`Do you really want to delete ${person.name}?`)) {
+                    onDeletePerson(person.id);
+                  }
+                }}
+              >
+                Delete
+              </button>
+            </li>
+          );
         })}
       </ul>
     </div>
@@ -18,8 +33,8 @@ const PersonDetails = (props) => {
   const { person } = props;
 
   return (
-    <li>
+    <span>
       {person.name} {person.number}
-    </li>
+    </span>
   );
 };

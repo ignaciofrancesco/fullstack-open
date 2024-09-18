@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Filter from "./components/Filter";
-import axios from "axios";
+import personsService from "./Service/persons";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 
@@ -13,7 +13,7 @@ const App = () => {
 
   /* Effects */
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
+    personsService.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
@@ -40,26 +40,53 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const personExists = persons.some((person) => {
+    const existentPerson = persons.find((person) => {
       return person.name.trim().toUpperCase() === newName.trim().toUpperCase();
     });
 
-    if (personExists) {
-      window.alert(`${newName} already exists in your contacts.`);
+    if (existentPerson) {
+      const wantsReplace = confirm(
+        `${newName} already exists in your contacts. Do you want to replace the current number with the new number?`
+      );
+
+      if (!wantsReplace) {
+        return;
+      }
+
+      const existentPersonCopy = { ...existentPerson, number: newNumber };
+
+      // Update person in backend and set new state on success
+      personsService.update(existentPersonCopy).then((response) => {
+        const existentPersonUpdated = response.data;
+
+        const newPersons = persons.map((person) => {
+          return person.id === existentPersonUpdated.id
+            ? existentPersonUpdated
+            : person;
+        });
+
+        setPersons(newPersons);
+        setNewName("");
+        setNewNumber("");
+        setFilter("");
+      });
+
       return;
     }
 
     const newPerson = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1,
     };
-    const newPersons = [...persons, newPerson];
 
-    setPersons(newPersons);
-    setNewName("");
-    setNewNumber("");
-    setFilter("");
+    // Save new person to backend
+    personsService.create(newPerson).then((response) => {
+      const newPersons = [...persons, response.data];
+      setPersons(newPersons);
+      setNewName("");
+      setNewNumber("");
+      setFilter("");
+    });
   };
 
   const handleChangeName = (event) => {
@@ -68,6 +95,15 @@ const App = () => {
 
   const handleChangeNumber = (event) => {
     setNewNumber(event.target.value);
+  };
+
+  const handleDeletePerson = (id) => {
+    personsService.deletePerson(id).then((response) => {
+      const newPersons = persons.filter((person) => {
+        return person.id !== id;
+      });
+      setPersons(newPersons);
+    });
   };
 
   /* Return */
@@ -86,7 +122,10 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <Persons filteredPersons={filteredPersons} />
+      <Persons
+        filteredPersons={filteredPersons}
+        onDeletePerson={handleDeletePerson}
+      />
     </div>
   );
 };
