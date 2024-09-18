@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import notesService from "./Service/notes.js";
 import Note from "./components/Note";
+import Notification from "./components/Notification.jsx";
+import Footer from "./components/Footer.jsx";
 
 const App = (props) => {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
   const [showAll, setShowAll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     notesService.getAll().then((allNotes) => {
@@ -56,7 +59,14 @@ const App = (props) => {
         setNotes(newNotesArray);
       })
       .catch((error) => {
-        alert(`The note ${id} doesn't exist anymore in the DB.`);
+        // alert(`The note ${id} doesn't exist anymore in the DB.`);
+
+        setErrorMessage(`The note ${id} doesn't exist anymore in the DB.`);
+
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+
         const newNotesArray = notes.filter((note) => {
           return note.id !== id;
         });
@@ -67,6 +77,7 @@ const App = (props) => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <button
         onClick={(event) => {
           setShowAll(!showAll);
@@ -96,6 +107,7 @@ const App = (props) => {
         />
         <button type="submit">save</button>
       </form>
+      <Footer />
     </div>
   );
 };
