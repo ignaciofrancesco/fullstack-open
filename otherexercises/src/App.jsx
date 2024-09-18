@@ -5,7 +5,7 @@ import Notification from "./components/Notification.jsx";
 import Footer from "./components/Footer.jsx";
 
 const App = (props) => {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState(null);
   const [newNote, setNewNote] = useState("");
   const [showAll, setShowAll] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -15,6 +15,10 @@ const App = (props) => {
       setNotes(allNotes);
     });
   }, []);
+
+  if (!notes) {
+    return null;
+  }
 
   const notesToShow = showAll
     ? notes

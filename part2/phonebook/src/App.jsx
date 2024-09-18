@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import Filter from "./components/Filter";
-import personsService from "./Service/persons";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
+import personsService from "./Service/persons";
 
 const App = () => {
   /* State */
@@ -10,12 +11,22 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   /* Effects */
   useEffect(() => {
-    personsService.getAll().then((response) => {
-      setPersons(response.data);
-    });
+    personsService
+      .getAll()
+      .then((response) => {
+        setPersons(response.data);
+      })
+      .catch((error) => {
+        setErrorMessage(error.message);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 3000);
+      });
   }, []);
 
   /* Computed Values */
@@ -56,20 +67,32 @@ const App = () => {
       const existentPersonCopy = { ...existentPerson, number: newNumber };
 
       // Update person in backend and set new state on success
-      personsService.update(existentPersonCopy).then((response) => {
-        const existentPersonUpdated = response.data;
+      personsService
+        .update(existentPersonCopy)
+        .then((response) => {
+          const existentPersonUpdated = response.data;
 
-        const newPersons = persons.map((person) => {
-          return person.id === existentPersonUpdated.id
-            ? existentPersonUpdated
-            : person;
+          const newPersons = persons.map((person) => {
+            return person.id === existentPersonUpdated.id
+              ? existentPersonUpdated
+              : person;
+          });
+
+          setPersons(newPersons);
+          setNewName("");
+          setNewNumber("");
+          setFilter("");
+          setStatusMessage(`You edited ${existentPersonUpdated.name}`);
+          setTimeout(() => {
+            setStatusMessage(null);
+          }, 3000);
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 3000);
         });
-
-        setPersons(newPersons);
-        setNewName("");
-        setNewNumber("");
-        setFilter("");
-      });
 
       return;
     }
@@ -80,13 +103,26 @@ const App = () => {
     };
 
     // Save new person to backend
-    personsService.create(newPerson).then((response) => {
-      const newPersons = [...persons, response.data];
-      setPersons(newPersons);
-      setNewName("");
-      setNewNumber("");
-      setFilter("");
-    });
+    personsService
+      .create(newPerson)
+      .then((response) => {
+        const personCreated = response.data;
+        const newPersons = [...persons, personCreated];
+        setPersons(newPersons);
+        setNewName("");
+        setNewNumber("");
+        setFilter("");
+        setStatusMessage(`You added ${personCreated.name}`);
+        setTimeout(() => {
+          setStatusMessage(null);
+        }, 3000);
+      })
+      .catch((error) => {
+        setErrorMessage(error.message);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 3000);
+      });
   };
 
   const handleChangeName = (event) => {
@@ -98,18 +134,28 @@ const App = () => {
   };
 
   const handleDeletePerson = (id) => {
-    personsService.deletePerson(id).then((response) => {
-      const newPersons = persons.filter((person) => {
-        return person.id !== id;
+    personsService
+      .deletePerson(id)
+      .then((response) => {
+        const newPersons = persons.filter((person) => {
+          return person.id !== id;
+        });
+        setPersons(newPersons);
+      })
+      .catch((error) => {
+        setErrorMessage(error.message);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 3000);
       });
-      setPersons(newPersons);
-    });
   };
 
   /* Return */
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={statusMessage} notificationClass="success" />
+      <Notification message={errorMessage} notificationClass="error" />
       <Filter value={filter} onChange={handleChangeFilter} />
 
       <h2>Add a new contact</h2>
