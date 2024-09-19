@@ -1,9 +1,15 @@
+import Weather from "./Weather";
+import { useEffect, useState } from "react";
+
 const CountryInfo = (props) => {
   const { country } = props;
 
+  /* STATES */
+  const [weather, setWeather] = useState(null);
+
   return (
     <div>
-      <h2>{country.name.common}</h2>
+      <h2>{country.name.official}</h2>
       <h3>Capitals:</h3>
       <ul>
         {country.capital.map((cap) => {
@@ -19,6 +25,11 @@ const CountryInfo = (props) => {
         })}
       </ul>
       <img src={country.flags.png} alt={country.flags.alt} width="100" />
+      <Weather
+        city={country.capital[0]}
+        lat={country.capitalInfo.latlng[0]}
+        lon={country.capitalInfo.latlng[1]}
+      />
     </div>
   );
 };

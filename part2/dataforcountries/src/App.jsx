@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Search from "./components/Search";
 import Results from "./components/Results";
 import countriesService from "./service/countries";
+import weatherService from "./service/weather";
 
 const App = (props) => {
   /* STATES */
@@ -16,9 +17,9 @@ const App = (props) => {
     });
   }, []);
 
-  // If countries are not fetched yet, render null
+  // If countries are not fetched yet, render loading
   if (countries === null) {
-    return null;
+    return <div>Loading...</div>;
   }
 
   /* COMPUTED VALUES */
@@ -27,6 +28,7 @@ const App = (props) => {
   const countriesCopy = JSON.parse(JSON.stringify(countries));
   const filteredCountries = countriesCopy.filter((c) => {
     const officialName = c.name.official.trim().toUpperCase();
+
     return officialName.includes(searchValue.trim().toUpperCase());
   });
 

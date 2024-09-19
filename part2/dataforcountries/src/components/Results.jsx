@@ -6,7 +6,7 @@ const Results = (props) => {
   // Results JSX
   let results = null;
   if (searchValue === "") {
-    results = <p>Use the search box to fin a country.</p>;
+    results = <p>Use the search box to find a country.</p>;
   } else if (countries.length > 10) {
     results = <p>Too many matches, specify another filter please.</p>;
   } else if (countries.length > 1) {
@@ -24,6 +24,8 @@ const Results = (props) => {
     );
   } else if (countries.length === 1) {
     results = <CountryInfo country={countries[0]} />;
+  } else {
+    results = <p>No results.</p>;
   }
 
   return <>{results}</>;
