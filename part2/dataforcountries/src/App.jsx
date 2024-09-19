@@ -26,8 +26,8 @@ const App = (props) => {
   // Filtered countries
   const countriesCopy = JSON.parse(JSON.stringify(countries));
   const filteredCountries = countriesCopy.filter((c) => {
-    const commonName = c.name.common.trim().toUpperCase();
-    return commonName.includes(searchValue.trim().toUpperCase());
+    const officialName = c.name.official.trim().toUpperCase();
+    return officialName.includes(searchValue.trim().toUpperCase());
   });
 
   /* EVENT HANDLERS */
@@ -37,10 +37,24 @@ const App = (props) => {
     setSearchValue(newSearchValue);
   };
 
+  const handleClickShow = (flag) => {
+    const selectedCountry = filteredCountries.find((c) => {
+      return c.flag === flag;
+    });
+
+    return () => {
+      setSearchValue(selectedCountry.name.official);
+    };
+  };
+
   return (
     <div>
       <Search value={searchValue} onChange={handleChangeSearch} />
-      <Results countries={filteredCountries} />
+      <Results
+        searchValue={searchValue}
+        countries={filteredCountries}
+        onClick={handleClickShow}
+      />
     </div>
   );
 };
