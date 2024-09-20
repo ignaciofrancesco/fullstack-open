@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 const CountryInfo = (props) => {
   const { country } = props;
 
-  /* STATES */
-  const [weather, setWeather] = useState(null);
-
   return (
     <div>
       <h2>{country.name.official}</h2>
