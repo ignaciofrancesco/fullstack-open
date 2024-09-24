@@ -167,7 +167,7 @@ const App = () => {
         onChangeNumber={handleChangeNumber}
       />
 
-      <h2>Numbers</h2>
+      <h2>Numbers!</h2>
       <Persons
         filteredPersons={filteredPersons}
         onDeletePerson={handleDeletePerson}
