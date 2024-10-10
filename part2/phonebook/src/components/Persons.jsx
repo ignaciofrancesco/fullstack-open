@@ -12,7 +12,11 @@ const Persons = (props) => {
               <PersonDetails person={person} />
               <button
                 onClick={() => {
-                  if (confirm(`Do you really want to delete ${person.name}?`)) {
+                  if (
+                    confirm(
+                      `Do you really want to delete ${person.name} - ${person.id}?`
+                    )
+                  ) {
                     onDeletePerson(person.id);
                   }
                 }}

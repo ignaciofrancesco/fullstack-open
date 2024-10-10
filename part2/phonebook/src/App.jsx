@@ -88,7 +88,8 @@ const App = () => {
           }, 3000);
         })
         .catch((error) => {
-          setErrorMessage(error.message);
+          console.log(error);
+          setErrorMessage(error.response.data.error);
           setTimeout(() => {
             setErrorMessage(null);
           }, 3000);
@@ -101,6 +102,7 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
+    console.log("creating person...");
 
     // Save new person to backend
     personsService
@@ -118,7 +120,8 @@ const App = () => {
         }, 3000);
       })
       .catch((error) => {
-        setErrorMessage(error.message);
+        console.log(error);
+        setErrorMessage(error.response.data.error);
         setTimeout(() => {
           setErrorMessage(null);
         }, 3000);
