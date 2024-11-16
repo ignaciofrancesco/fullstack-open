@@ -1,17 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import loginService from "./services/login.js";
 import notesService from "./services/notes.js";
 import Note from "./components/Note";
 import Notification from "./components/Notification.jsx";
 import Footer from "./components/Footer.jsx";
+import LoginForm from "./components/LoginForm.jsx";
+import Togglable from "./components/Togglable.jsx";
+import NoteForm from "./components/NoteForm.jsx";
+
 const App = (props) => {
+  /* STATE */
+
   const [notes, setNotes] = useState(null);
-  const [newNote, setNewNote] = useState("");
   const [showAll, setShowAll] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
+
+  /* REFS */
+
+  // This is a reference that im going to use to reference the NoteForm component
+  const noteFormRef = useRef();
+
+  /* EFFECTS */
 
   // Get all notes
   useEffect(() => {
@@ -30,35 +42,21 @@ const App = (props) => {
     }
   }, []); // the empty array means to only run after the first render
 
+  /* BEHAVIOR */
+
+  // If there are no notes, dont show anything
   if (!notes) {
     return null;
   }
 
+  // Filters the notes to show
   const notesToShow = showAll
     ? notes
     : notes.filter((note) => {
         return note.important;
       });
 
-  const addNote = (event) => {
-    event.preventDefault();
-
-    const newNoteObject = {
-      content: newNote,
-      important: Math.random() > 0.5,
-    };
-
-    notesService.create(newNoteObject).then((createdNote) => {
-      const newNotesArray = notes.concat(createdNote);
-      setNotes(newNotesArray);
-      setNewNote("");
-    });
-  };
-
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value);
-  };
-
+  // Handler for updating the importance of a note
   const toggleImportanceOf = (id) => {
     const note = notes.find((note) => {
       return note.id === id;
@@ -92,6 +90,7 @@ const App = (props) => {
       });
   };
 
+  // Handles login
   const handleLogin = async (event) => {
     event.preventDefault();
     console.log("logging in with", username, password);
@@ -120,35 +119,35 @@ const App = (props) => {
     }
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
+  // Handles submit new note
+  const addNote = (noteObject) => {
+    // I use the ref to the NoteForm to access its toggleVisibility function
+    noteFormRef.current.toggleVisibility();
+    notesService.create(noteObject).then((returnedNote) => {
+      setNotes(notes.concat(returnedNote));
+    });
+  };
+
+  /* VIEW */
+
+  const loginForm = () => {
+    return (
+      <Togglable buttonLabel="login">
+        <LoginForm
+          username={username}
+          password={password}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
+          handleSubmit={handleLogin}
         />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
+      </Togglable>
+    );
+  };
 
   const noteForm = () => (
-    <form onSubmit={addNote}>
-      <input value={newNote} onChange={handleNoteChange} />
-      <button type="submit">save</button>
-    </form>
+    <Togglable buttonLabel="new note" ref={noteFormRef}>
+      <NoteForm createNote={addNote} />
+    </Togglable>
   );
 
   return (
@@ -162,7 +161,7 @@ const App = (props) => {
           <p>{user.name} logged-in</p>
           {noteForm()}
         </div>
-      )}{" "}
+      )}
       <br></br>
       <button
         onClick={(event) => {
