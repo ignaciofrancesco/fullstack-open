@@ -53,8 +53,8 @@ const App = (props) => {
   const notesToShow = showAll
     ? notes
     : notes.filter((note) => {
-        return note.important;
-      });
+      return note.important;
+    });
 
   // Handler for updating the importance of a note
   const toggleImportanceOf = (id) => {
